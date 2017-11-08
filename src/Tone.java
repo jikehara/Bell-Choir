@@ -1,6 +1,9 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
@@ -8,51 +11,88 @@ import javax.sound.sampled.SourceDataLine;
 
 public class Tone {
 
-	// Mary had a little lamb
-	private static final List<BellNote> song = new ArrayList<BellNote>() {
-		{
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-			add(new BellNote(Note.F4, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.HALF));
-
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.HALF));
-
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.HALF));
-
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-			add(new BellNote(Note.F4, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-			add(new BellNote(Note.A5, NoteLength.QUARTER));
-			add(new BellNote(Note.G4, NoteLength.QUARTER));
-
-			add(new BellNote(Note.F4, NoteLength.WHOLE));
-		}
-	};
+	/**
+	 * Song contains all of the notes for the bell choir
+	 */
+//	private static final List<BellNote> song = new ArrayList<BellNote>() {
+//		{
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//			add(new BellNote(Note.F4, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.HALF));
+//
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.HALF));
+//
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.HALF));
+//
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//			add(new BellNote(Note.F4, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//			add(new BellNote(Note.A5, NoteLength.QUARTER));
+//			add(new BellNote(Note.G4, NoteLength.QUARTER));
+//
+//			add(new BellNote(Note.F4, NoteLength.WHOLE));
+//		}
+//	};
 
 	public static void main(String[] args) throws Exception {
 		final AudioFormat af = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
 		Tone t = new Tone(af);
-		t.playSong(song);
+		List<BellNote> readInNotes = loadNotes("MaryHadALittleLamb.txt");
+		t.playSong(readInNotes);
 	}
 
+	/**
+	 * Adapted from Nate's TicTacToe_V2 Reads text file of notes in, turns it into a
+	 * note list
+	 * string to enum parser taken from Stack Overflow 
+	 * https://stackoverflow.com/questions/7056959/convert-string-to-equivalent-enum-value
+	 * @param filename
+	 * @return
+	 */
+	private static List<BellNote> loadNotes(String filename) {
+		final List<BellNote> notes = new ArrayList<>();
+		final File file = new File(filename);
+		if (file.exists()) {
+			try (FileReader fileReader = new FileReader(file); BufferedReader br = new BufferedReader(fileReader)) {
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					String[] noteInfo = line.split(" ");// read note and note length
+					String n = noteInfo[0]; // note name
+					String nl = noteInfo[1]; // note length as string	
+//					System.out.println(n+" "+nl);
+					nl = formatNoteLength(nl);
+					System.out.println(n+" "+nl);
+					notes.add(new BellNote(Note.valueOf(n), NoteLength.valueOf(nl)));// add note to the song
+				}
+			} catch (IOException ignored) {
+			}
+		} else {
+			System.err.println("File '" + filename + "' not found");
+		}
+		return notes;
+	}
+
+	/**
+	 * AudioFormat
+	 */
 	private final AudioFormat af;
 
 	Tone(AudioFormat af) {
@@ -71,14 +111,52 @@ public class Tone {
 		}
 	}
 
+	/**
+	 * Play notes according to passed in noteLength
+	 * 
+	 * @param SourceDataLine
+	 *            line
+	 * @param BellNote
+	 *            bn
+	 */
 	private void playNote(SourceDataLine line, BellNote bn) {
 		final int ms = Math.min(bn.length.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
 		final int length = Note.SAMPLE_RATE * ms / 1000;
 		line.write(bn.note.sample(), 0, length);
 		line.write(Note.REST.sample(), 0, 50);
 	}
+
+	/**
+	 * Method that changes note length read in to the format that
+	 * our bell choir can read
+	 * Switch Statement syntax from Oracle documentation:
+	 * https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html
+	 * @param length
+	 * @return
+	 */
+	private static String formatNoteLength(String length) {
+		String properLength = "QUARTER"; // default to whole note
+		System.out.println(length);
+		switch (length) {
+		case "4": 
+			properLength = "QUARTER";
+			break;
+		case "2":
+			properLength = "HALF";
+			break;
+		case "1":
+			properLength = "WHOLE";
+			break;
+		}
+		return properLength;
+	}
 }
 
+/**
+ * 
+ * @author Joseph Ikehara - this class is from Nate Williams
+ *
+ */
 class BellNote {
 	final Note note;
 	final NoteLength length;
@@ -89,6 +167,11 @@ class BellNote {
 	}
 }
 
+/**
+ * 
+ * @author Joseph Ikehara - this class is from Nate Williams
+ *
+ */
 enum NoteLength {
 	WHOLE(1.0f), HALF(0.5f), QUARTER(0.25f), EIGTH(0.125f);
 
@@ -103,8 +186,13 @@ enum NoteLength {
 	}
 }
 
+/**
+ * 
+ * @author Joseph Ikehara - this class is from Nate Williams
+ *
+ */
 enum Note {
-	// REST Must be the first 'Note'
+	// REST Must be the first 'Note' - all of the notes playable by the bell choir
 	REST, A4, A4S, B4, C4, C4S, D4, D4S, E4, F4, F4S, G4, G4S, A5;
 
 	public static final int SAMPLE_RATE = 48 * 1024; // ~48KHz
