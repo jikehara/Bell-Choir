@@ -14,7 +14,8 @@ public class Tone {
 	public static void main(String[] args) throws Exception {
 		final AudioFormat af = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
 		Tone t = new Tone(af);
-		List<BellNote> readInNotes = loadNotes("MaryHadALittleLamb.txt");
+//		System.out.println(args[0]);
+		List<BellNote> readInNotes = loadNotes(args[0]);
 		t.playSong(readInNotes);
 	}
 
@@ -38,7 +39,7 @@ public class Tone {
 					String nl = noteInfo[1]; // note length as string	
 //					System.out.println(n+" "+nl);
 					nl = formatNoteLength(nl);
-					System.out.println(n+" "+nl);
+//					System.out.println(n+" "+nl);
 					notes.add(new BellNote(Note.valueOf(n), NoteLength.valueOf(nl)));// add note to the song
 				}
 			} catch (IOException ignored) {
@@ -95,8 +96,11 @@ public class Tone {
 	 */
 	private static String formatNoteLength(String length) {
 		String properLength = "QUARTER"; // default to whole note
-		System.out.println(length);
+//		System.out.println(length);
 		switch (length) {
+		case "8":
+			properLength = "EIGHTH";
+			break;
 		case "4": 
 			properLength = "QUARTER";
 			break;
@@ -132,12 +136,12 @@ class BellNote {
  *
  */
 enum NoteLength {
-	WHOLE(1.0f), HALF(0.5f), QUARTER(0.25f), EIGTH(0.125f);
+	WHOLE(1.0f), HALF(0.5f), QUARTER(0.25f), EIGHTH(0.125f);
 
 	private final int timeMs;
 
 	private NoteLength(float length) {
-		timeMs = (int) (length * Note.MEASURE_LENGTH_SEC * 1000);
+		timeMs = (int) (length * Note.MEASURE_LENGTH_SEC * 1000);// change how long notes are
 	}
 
 	public int timeMs() {
