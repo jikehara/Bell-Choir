@@ -20,7 +20,7 @@
 		</jar>
 	</target>
 
-	<target name="run" depends="jar">
+	<target name="run" depends="songarg">
 		<java jar="${dist}/${ant.project.name}.jar" fork="true">
 			<arg value="${song}"/>
 		</java>

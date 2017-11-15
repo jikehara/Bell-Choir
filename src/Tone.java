@@ -14,16 +14,22 @@ public class Tone {
 	public static void main(String[] args) throws Exception {
 		final AudioFormat af = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
 		Tone t = new Tone(af);
-//		System.out.println(args[0]);
-		List<BellNote> readInNotes = loadNotes(args[0]);
+		List<BellNote> readInNotes;
+		// test whether we have a song, else play Mary Had a Little Lamb
+		// must be run in "ant run"
+		if (args[0] == null)
+			readInNotes = loadNotes("MaryHadALittleLamb.txt");
+		else
+			readInNotes = loadNotes(args[0]);
+		
 		t.playSong(readInNotes);
 	}
 
 	/**
 	 * Adapted from Nate's TicTacToe_V2 Reads text file of notes in, turns it into a
-	 * note list
-	 * string to enum parser taken from Stack Overflow 
+	 * note list string to enum parser taken from Stack Overflow
 	 * https://stackoverflow.com/questions/7056959/convert-string-to-equivalent-enum-value
+	 * 
 	 * @param filename
 	 * @return
 	 */
@@ -36,10 +42,14 @@ public class Tone {
 				while ((line = br.readLine()) != null) {
 					String[] noteInfo = line.split(" ");// read note and note length
 					String n = noteInfo[0]; // note name
-					String nl = noteInfo[1]; // note length as string	
-//					System.out.println(n+" "+nl);
+					String nl = noteInfo[1]; // note length as string
+					// System.out.println(n+" "+nl);
+					// error check - if more or less than note and length
+					if (noteInfo.length != 2) {
+						System.out.println("Incorrect format for note in text file.");
+					}
 					nl = formatNoteLength(nl);
-//					System.out.println(n+" "+nl);
+					// System.out.println(n+" "+nl);
 					notes.add(new BellNote(Note.valueOf(n), NoteLength.valueOf(nl)));// add note to the song
 				}
 			} catch (IOException ignored) {
@@ -72,14 +82,14 @@ public class Tone {
 	}
 
 	/**
-	 * Play notes according to passed in noteLength
+	 * Play note according to passed in noteLength
 	 * 
 	 * @param SourceDataLine
 	 *            line
 	 * @param BellNote
 	 *            bn
 	 */
-	private void playNote(SourceDataLine line, BellNote bn) {
+	void playNote(SourceDataLine line, BellNote bn) {
 		final int ms = Math.min(bn.length.timeMs(), Note.MEASURE_LENGTH_SEC * 1000);
 		final int length = Note.SAMPLE_RATE * ms / 1000;
 		line.write(bn.note.sample(), 0, length);
@@ -87,21 +97,21 @@ public class Tone {
 	}
 
 	/**
-	 * Method that changes note length read in to the format that
-	 * our bell choir can read
-	 * Switch Statement syntax from Oracle documentation:
+	 * Method that changes note length read in to the format that our bell choir can
+	 * read Switch Statement syntax from Oracle documentation:
 	 * https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html
+	 * 
 	 * @param length
 	 * @return
 	 */
 	private static String formatNoteLength(String length) {
-		String properLength = "QUARTER"; // default to whole note
-//		System.out.println(length);
+		String properLength = "WHOLE"; // default to whole note
+		// System.out.println(length);
 		switch (length) {
 		case "8":
 			properLength = "EIGHTH";
 			break;
-		case "4": 
+		case "4":
 			properLength = "QUARTER";
 			break;
 		case "2":
@@ -117,7 +127,7 @@ public class Tone {
 
 /**
  * 
- * @author Joseph Ikehara - this class is from Nate Williams
+ * @author Nate Williams
  *
  */
 class BellNote {
@@ -132,7 +142,7 @@ class BellNote {
 
 /**
  * 
- * @author Joseph Ikehara - this class is from Nate Williams
+ * @author Nate Williams
  *
  */
 enum NoteLength {
@@ -151,7 +161,7 @@ enum NoteLength {
 
 /**
  * 
- * @author Joseph Ikehara - this class is from Nate Williams
+ * @author Nate Williams
  *
  */
 enum Note {
